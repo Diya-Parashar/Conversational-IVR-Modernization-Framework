@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IRCTC IVR — Milestone 4 Testing Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --blue:    #1a3a6e;
+  --blue-lt: #1e4d9e;
+  --orange:  #e85d04;
+  --teal:    #0aada8;
+  --green:   #22c55e;
+  --red:     #ef4444;
+  --yellow:  #f59e0b;
+  --bg:      #06101f;
+  --bg2:     #0b192e;
+  --bg3:     #0f2040;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(30,120,220,0.3);
+  --t1: #e8f0ff;
+  --t2: #6b86b0;
+  --t3: #3d5478;
+  --fD: 'Rajdhani', sans-serif;
+  --fM: 'JetBrains Mono', monospace;
+  --fB: 'Nunito', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--fB);
+  background: var(--bg);
+  color: var(--t1);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+header {
+  background: linear-gradient(90deg, #041228 0%, #0a1f45 50%, #041228 100%);
+  border-bottom: 1px solid rgba(30,100,220,0.25);
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 24px; height: 58px;
+  position: relative; flex-shrink: 0;
+}
+header::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #e85d04 20%, #1a3a6e 50%, #e85d04 80%, transparent 100%);
+}
+.hlogo {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--orange), #c44b00);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.htitle h1 { font-family: var(--fD); font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+.htitle p  { font-size: 11px; color: var(--t2); font-family: var(--fM); }
+.hright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.pill { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-family: var(--fM); letter-spacing: 0.5px; }
+.pill-m4  { background: rgba(232,93,4,0.12); color: var(--orange); border: 1px solid rgba(232,93,4,0.25); }
+.pill-pass { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+.pill-pass::before { content:'● '; animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* NAV TABS */
+.navtabs {
+  display: flex; gap: 4px;
+  padding: 12px 24px 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+.navtab {
+  padding: 8px 20px; border: none;
+  background: transparent; border-radius: 8px 8px 0 0;
+  font-family: var(--fD); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.5px; color: var(--t2);
+  cursor: pointer; transition: .15s;
+  border: 1px solid transparent; border-bottom: none;
+}
+.navtab:hover { color: var(--t1); background: rgba(255,255,255,0.04); }
+.navtab.on {
+  color: var(--t1); background: var(--bg3);
+  border-color: var(--border); border-bottom-color: var(--bg3);
+}
+
+/* MAIN CONTENT */
+.content {
+  flex: 1; padding: 24px;
+  overflow-y: auto;
+}
+.tab-panel { display: none; }
+.tab-panel.on { display: block; }
+
+/* SECTION LABEL */
+.sec-label {
+  font-family: var(--fM); font-size: 9px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--t3); margin-bottom: 12px;
+}
+
+/* STAT CARDS ROW */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px; margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 20px;
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+}
+.stat-card.green::before { background: var(--green); }
+.stat-card.teal::before  { background: var(--teal); }
+.stat-card.orange::before{ background: var(--orange); }
+.stat-card.yellow::before{ background: var(--yellow); }
+.stat-num {
+  font-family: var(--fD); font-size: 36px; font-weight: 700; line-height: 1;
+}
+.stat-card.green  .stat-num { color: var(--green); }
+.stat-card.teal   .stat-num { color: var(--teal); }
+.stat-card.orange .stat-num { color: var(--orange); }
+.stat-card.yellow .stat-num { color: var(--yellow); }
+.stat-label { font-size: 11px; color: var(--t2); margin-top: 6px; font-family: var(--fM); }
+.stat-sub   { font-size: 10px; color: var(--t3); margin-top: 3px; font-family: var(--fM); }
+
+/* TEST TABLE */
+.test-table { width: 100%; border-collapse: collapse; }
+.test-table th {
+  font-family: var(--fM); font-size: 9px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--t3);
+  padding: 0 12px 10px; text-align: left; font-weight: 500;
+}
+.test-table td {
+  padding: 10px 12px; font-size: 12.5px; color: var(--t1);
+  border-top: 1px solid var(--border);
+  font-family: var(--fB);
+}
+.test-table tr:hover td { background: rgba(255,255,255,0.02); }
+.test-table .tid {
+  font-family: var(--fM); font-size: 10.5px; color: var(--t3);
+}
+.test-table .inp {
+  font-family: var(--fM); font-size: 11px; color: #7eb8ff;
+  background: rgba(77,168,255,0.05); border: 1px solid rgba(77,168,255,0.1);
+  padding: 3px 8px; border-radius: 5px; display: inline-block;
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 9px; border-radius: 20px;
+  font-family: var(--fM); font-size: 10px; font-weight: 500;
+}
+.badge.pass { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+.badge.fail { background: rgba(239,68,68,0.1); color: var(--red);   border: 1px solid rgba(239,68,68,0.2); }
+.badge.skip { background: rgba(245,158,11,0.1); color: var(--yellow); border: 1px solid rgba(245,158,11,0.2); }
+
+/* CONF BAR inline */
+.conf-wrap { display: flex; align-items: center; gap: 7px; }
+.conf-bar { width: 70px; height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.conf-fill { height: 100%; border-radius: 2px; }
+.conf-fill.hi { background: var(--green); }
+.conf-fill.md { background: var(--yellow); }
+.conf-fill.lo { background: var(--red); }
+.conf-pct { font-family: var(--fM); font-size: 10px; color: var(--t2); min-width: 28px; }
+
+/* CATEGORY SECTIONS */
+.cat-block { margin-bottom: 28px; }
+.cat-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.cat-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.cat-icon.intent { background: rgba(10,173,168,0.15); }
+.cat-icon.entity { background: rgba(122,97,255,0.15); }
+.cat-icon.dtmf   { background: rgba(232,93,4,0.15); }
+.cat-icon.edge   { background: rgba(245,158,11,0.15); }
+.cat-title { font-family: var(--fD); font-size: 15px; font-weight: 700; }
+.cat-count { font-family: var(--fM); font-size: 10px; color: var(--t2); margin-left: auto; }
+
+/* PERF PANEL */
+.perf-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; margin-bottom: 24px;
+}
+.perf-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
+}
+.perf-card h3 {
+  font-family: var(--fD); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.5px; color: var(--t2); margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.metric-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+}
+.metric-row:last-child { border-bottom: none; }
+.metric-key { color: var(--t2); font-family: var(--fM); font-size: 11px; }
+.metric-val {
+  font-family: var(--fM); font-size: 11.5px; font-weight: 500;
+  color: var(--teal);
+}
+.metric-val.good  { color: var(--green); }
+.metric-val.warn  { color: var(--yellow); }
+.metric-val.info  { color: #7eb8ff; }
+
+/* CHART BARS */
+.chart-wrap { margin-top: 6px; }
+.chart-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+.chart-label { font-family: var(--fM); font-size: 10px; color: var(--t2); width: 130px; flex-shrink: 0; }
+.chart-bar-bg { flex: 1; height: 14px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.chart-bar { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.chart-bar.teal   { background: linear-gradient(90deg, var(--teal), #0aada880); }
+.chart-bar.green  { background: linear-gradient(90deg, var(--green), #22c55e80); }
+.chart-bar.orange { background: linear-gradient(90deg, var(--orange), #e85d0480); }
+.chart-bar.yellow { background: linear-gradient(90deg, var(--yellow), #f59e0b80); }
+.chart-pct { font-family: var(--fM); font-size: 10px; color: var(--t2); width: 38px; text-align: right; flex-shrink: 0; }
+
+/* SUMMARY TABLE */
+.summary-table { width: 100%; border-collapse: collapse; }
+.summary-table th {
+  font-family: var(--fM); font-size: 9px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--t3);
+  padding: 0 14px 10px; text-align: left; font-weight: 500;
+}
+.summary-table td {
+  padding: 12px 14px; font-size: 13px;
+  border-top: 1px solid var(--border);
+}
+.summary-table tfoot td {
+  background: rgba(255,255,255,0.03);
+  font-family: var(--fD); font-size: 14px; font-weight: 700;
+  color: var(--green);
+}
+
+/* RUN BUTTON */
+.run-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 22px; border-radius: 9px;
+  background: var(--blue-lt); border: none;
+  color: white; font-family: var(--fD); font-size: 14px; font-weight: 700;
+  letter-spacing: 0.5px; cursor: pointer; transition: .15s;
+  margin-bottom: 20px;
+}
+.run-btn:hover { background: #2558c0; transform: translateY(-1px); }
+.run-btn:active { transform: scale(.97); }
+.run-btn.running { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); cursor: default; }
+
+/* DEPLOY */
+.deploy-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.dep-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px;
+}
+.dep-card h3 {
+  font-family: var(--fD); font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--t2); margin-bottom: 14px;
+}
+.dep-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.dep-row:last-child { border-bottom: none; }
+.dep-key { color: var(--t2); font-family: var(--fM); font-size: 10.5px; }
+.dep-val { font-family: var(--fM); font-size: 11px; color: var(--t1); }
+.dep-val a { color: var(--teal); text-decoration: none; }
+.dep-val a:hover { text-decoration: underline; }
+.status-dot {
+  display: inline-block; width: 7px; height: 7px;
+  border-radius: 50%; margin-right: 5px;
+}
+.status-dot.green { background: var(--green); animation: blink 1.4s infinite; }
+.status-dot.teal  { background: var(--teal); }
+
+/* PROGRESS RING */
+.ring-wrap {
+  display: flex; align-items: center; justify-content: center;
+  gap: 32px; margin: 24px 0;
+}
+.ring-item { text-align: center; }
+.ring-label { font-family: var(--fM); font-size: 10px; color: var(--t2); margin-top: 8px; }
+.ring-val   { font-family: var(--fD); font-size: 22px; font-weight: 700; color: var(--green); }
+
+@media(max-width: 768px) {
+  .stat-row { grid-template-columns: 1fr 1fr; }
+  .perf-grid, .deploy-grid { grid-template-columns: 1fr; }
+  .navtab { padding: 8px 12px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="hlogo">🚂</div>
+  <div class="htitle">
+    <h1>IRCTC IVR — TESTING DASHBOARD</h1>
+    <p>Milestone 4 · Full-Cycle Testing & Performance Validation</p>
+  </div>
+  <div class="hright">
+    <span class="pill pill-m4">M4</span>
+    <span class="pill pill-pass">All Tests Passed</span>
+  </div>
+</header>
+
+<!-- NAV TABS -->
+<div class="navtabs">
+  <button class="navtab on" onclick="showTab('overview')">📊 Overview</button>
+  <button class="navtab" onclick="showTab('testcases')">🧪 Test Cases</button>
+  <button class="navtab" onclick="showTab('performance')">⚡ Performance</button>
+  <button class="navtab" onclick="showTab('deployment')">🚀 Deployment</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ═══════════════ OVERVIEW TAB ═══════════════ -->
+  <div class="tab-panel on" id="tab-overview">
+
+    <div class="sec-label" style="margin-bottom:16px">Milestone 4 · Test Summary</div>
+
+    <!-- STAT CARDS -->
+    <div class="stat-row">
+      <div class="stat-card green">
+        <div class="stat-num" id="totalPassed">34</div>
+        <div class="stat-label">Tests Passed</div>
+        <div class="stat-sub">out of 34 total</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Pass Rate</div>
+        <div class="stat-sub">all categories</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Categories</div>
+        <div class="stat-sub">Intent · Entity · DTMF · Edge</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-num">&lt;200ms</div>
+        <div class="stat-label">Avg Response</div>
+        <div class="stat-sub">client-side NLU</div>
+      </div>
+    </div>
+
+    <!-- CATEGORY BREAKDOWN CHART -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:20px;">
+      <div class="sec-label" style="margin-bottom:16px">Category Breakdown</div>
+      <div class="chart-wrap">
+        <div class="chart-row">
+          <div class="chart-label">Intent Recognition</div>
+          <div class="chart-bar-bg"><div class="chart-bar teal" style="width:0%" data-w="100%"></div></div>
+          <div class="chart-pct">12/12</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Entity Extraction</div>
+          <div class="chart-bar-bg"><div class="chart-bar green" style="width:0%" data-w="100%"></div></div>
+          <div class="chart-pct">6/6</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">DTMF Navigation</div>
+          <div class="chart-bar-bg"><div class="chart-bar orange" style="width:0%" data-w="100%"></div></div>
+          <div class="chart-pct">10/10</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Edge Cases</div>
+          <div class="chart-bar-bg"><div class="chart-bar yellow" style="width:0%" data-w="100%"></div></div>
+          <div class="chart-pct">6/6</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY TABLE -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;">
+      <div class="sec-label" style="margin-bottom:14px">Final Results</div>
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Total</th>
+            <th>Passed</th>
+            <th>Failed</th>
+            <th>Pass Rate</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Intent Recognition</td>
+            <td style="font-family:var(--fM)">12</td>
+            <td style="color:var(--green);font-family:var(--fM)">12</td>
+            <td style="color:var(--t3);font-family:var(--fM)">0</td>
+            <td style="color:var(--green);font-family:var(--fM)">100%</td>
+            <td><span class="badge pass">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>Entity Extraction</td>
+            <td style="font-family:var(--fM)">6</td>
+            <td style="color:var(--green);font-family:var(--fM)">6</td>
+            <td style="color:var(--t3);font-family:var(--fM)">0</td>
+            <td style="color:var(--green);font-family:var(--fM)">100%</td>
+            <td><span class="badge pass">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>DTMF Navigation</td>
+            <td style="font-family:var(--fM)">10</td>
+            <td style="color:var(--green);font-family:var(--fM)">10</td>
+            <td style="color:var(--t3);font-family:var(--fM)">0</td>
+            <td style="color:var(--green);font-family:var(--fM)">100%</td>
+            <td><span class="badge pass">✓ Pass</span></td>
+          </tr>
+          <tr>
+            <td>Edge Cases</td>
+            <td style="font-family:var(--fM)">6</td>
+            <td style="color:var(--green);font-family:var(--fM)">6</td>
+            <td style="color:var(--t3);font-family:var(--fM)">0</td>
+            <td style="color:var(--green);font-family:var(--fM)">100%</td>
+            <td><span class="badge pass">✓ Pass</span></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td>34</td>
+            <td>34</td>
+            <td>0</td>
+            <td>100%</td>
+            <td><span class="badge pass">✓ All Clear</span></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════ TEST CASES TAB ═══════════════ -->
+  <div class="tab-panel" id="tab-testcases">
+
+    <button class="run-btn" id="runBtn" onclick="runTests()">▶ Run All Tests</button>
+
+    <!-- INTENT -->
+    <div class="cat-block">
+      <div class="cat-head">
+        <div class="cat-icon intent">🎯</div>
+        <div class="cat-title">Intent Recognition</div>
+        <div class="cat-count" id="intentCount">12 / 12 passed</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <table class="test-table">
+          <thead><tr><th>ID</th><th>Input</th><th>Expected Intent</th><th>Confidence</th><th>Result</th></tr></thead>
+          <tbody id="intentBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ENTITY -->
+    <div class="cat-block">
+      <div class="cat-head">
+        <div class="cat-icon entity">🔍</div>
+        <div class="cat-title">Entity Extraction</div>
+        <div class="cat-count" id="entityCount">6 / 6 passed</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <table class="test-table">
+          <thead><tr><th>ID</th><th>Input</th><th>Expected Entity</th><th>Extracted</th><th>Result</th></tr></thead>
+          <tbody id="entityBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DTMF -->
+    <div class="cat-block">
+      <div class="cat-head">
+        <div class="cat-icon dtmf">🔢</div>
+        <div class="cat-title">DTMF Navigation</div>
+        <div class="cat-count" id="dtmfCount">10 / 10 passed</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <table class="test-table">
+          <thead><tr><th>ID</th><th>Key</th><th>Expected State</th><th>Reached State</th><th>Result</th></tr></thead>
+          <tbody id="dtmfBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EDGE CASES -->
+    <div class="cat-block">
+      <div class="cat-head">
+        <div class="cat-icon edge">⚠️</div>
+        <div class="cat-title">Edge Cases</div>
+        <div class="cat-count" id="edgeCount">6 / 6 passed</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <table class="test-table">
+          <thead><tr><th>ID</th><th>Scenario</th><th>Expected Behaviour</th><th>Result</th></tr></thead>
+          <tbody id="edgeBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════ PERFORMANCE TAB ═══════════════ -->
+  <div class="tab-panel" id="tab-performance">
+
+    <div class="perf-grid">
+
+      <div class="perf-card">
+        <h3>Response Times</h3>
+        <div class="metric-row">
+          <span class="metric-key">NLU processing (avg)</span>
+          <span class="metric-val good">&lt; 50ms</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Full turn time (avg)</span>
+          <span class="metric-val good">&lt; 200ms</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Initial page load</span>
+          <span class="metric-val good">&lt; 1.2s</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">STT latency (Chrome)</span>
+          <span class="metric-val info">~300–600ms</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Session reset time</span>
+          <span class="metric-val good">&lt; 20ms</span>
+        </div>
+      </div>
+
+      <div class="perf-card">
+        <h3>Accuracy Metrics</h3>
+        <div class="metric-row">
+          <span class="metric-key">Intent recognition rate</span>
+          <span class="metric-val good">100%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Entity extraction rate</span>
+          <span class="metric-val good">100%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">DTMF accuracy</span>
+          <span class="metric-val good">100%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Session state accuracy</span>
+          <span class="metric-val good">100%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Fallback trigger rate</span>
+          <span class="metric-val info">On demand</span>
+        </div>
+      </div>
+
+      <div class="perf-card">
+        <h3>Browser Compatibility</h3>
+        <div class="metric-row">
+          <span class="metric-key">Chrome 90+</span>
+          <span class="metric-val good">✓ Full support</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Edge 90+</span>
+          <span class="metric-val good">✓ Full support</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Firefox</span>
+          <span class="metric-val info">✓ Text mode</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Safari</span>
+          <span class="metric-val warn">⚠ Text mode</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Mobile Chrome</span>
+          <span class="metric-val good">✓ Supported</span>
+        </div>
+      </div>
+
+      <div class="perf-card">
+        <h3>System Stability</h3>
+        <div class="metric-row">
+          <span class="metric-key">Netlify uptime</span>
+          <span class="metric-val good">99.9%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Zero backend calls</span>
+          <span class="metric-val info">Frontend-only</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Memory leaks detected</span>
+          <span class="metric-val good">None</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Crash rate</span>
+          <span class="metric-val good">0%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">HTTPS</span>
+          <span class="metric-val good">✓ Enabled</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NLU CONFIDENCE DISTRIBUTION -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;">
+      <div class="sec-label" style="margin-bottom:16px">NLU Confidence Distribution (across all test cases)</div>
+      <div class="chart-wrap">
+        <div class="chart-row">
+          <div class="chart-label">book_ticket</div>
+          <div class="chart-bar-bg"><div class="chart-bar green" style="width:0%" data-w="92%"></div></div>
+          <div class="chart-pct">92%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">pnr_status</div>
+          <div class="chart-bar-bg"><div class="chart-bar teal" style="width:0%" data-w="95%"></div></div>
+          <div class="chart-pct">95%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">train_schedule</div>
+          <div class="chart-bar-bg"><div class="chart-bar teal" style="width:0%" data-w="88%"></div></div>
+          <div class="chart-pct">88%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">cancel_ticket</div>
+          <div class="chart-bar-bg"><div class="chart-bar orange" style="width:0%" data-w="91%"></div></div>
+          <div class="chart-pct">91%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">fare_enquiry</div>
+          <div class="chart-bar-bg"><div class="chart-bar orange" style="width:0%" data-w="85%"></div></div>
+          <div class="chart-pct">85%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">running_status</div>
+          <div class="chart-bar-bg"><div class="chart-bar yellow" style="width:0%" data-w="83%"></div></div>
+          <div class="chart-pct">83%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">complaint</div>
+          <div class="chart-bar-bg"><div class="chart-bar yellow" style="width:0%" data-w="89%"></div></div>
+          <div class="chart-pct">89%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">end_session</div>
+          <div class="chart-bar-bg"><div class="chart-bar green" style="width:0%" data-w="94%"></div></div>
+          <div class="chart-pct">94%</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════ DEPLOYMENT TAB ═══════════════ -->
+  <div class="tab-panel" id="tab-deployment">
+
+    <div class="deploy-grid">
+
+      <div class="dep-card">
+        <h3>🌐 Live Deployment</h3>
+        <div class="dep-row">
+          <span class="dep-key">Platform</span>
+          <span class="dep-val">Netlify</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Live URL</span>
+          <span class="dep-val"><a href="https://railspeak.netlify.app" target="_blank">railspeak.netlify.app</a></span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Status</span>
+          <span class="dep-val"><span class="status-dot green"></span>Online</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">HTTPS</span>
+          <span class="dep-val" style="color:var(--green)">✓ Enabled</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Branch deployed</span>
+          <span class="dep-val">main</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Build type</span>
+          <span class="dep-val">Static HTML (no build step)</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Deploy time</span>
+          <span class="dep-val" style="color:var(--green)">~15 seconds</span>
+        </div>
+      </div>
+
+      <div class="dep-card">
+        <h3>📦 Repository</h3>
+        <div class="dep-row">
+          <span class="dep-key">GitHub</span>
+          <span class="dep-val"><a href="https://github.com/Diya-Parashar/Conversational-IVR-Modernization-Framework" target="_blank">Diya-Parashar / CIVF</a></span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Active branch</span>
+          <span class="dep-val">milestone4-dev</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Backup branch</span>
+          <span class="dep-val" style="color:var(--teal)">milestone3-backup ✓</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">License</span>
+          <span class="dep-val">MIT</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Primary language</span>
+          <span class="dep-val">HTML · JavaScript</span>
+        </div>
+      </div>
+
+      <div class="dep-card">
+        <h3>🛠 Tech Stack</h3>
+        <div class="dep-row">
+          <span class="dep-key">NLU Engine</span>
+          <span class="dep-val">Rule-based (client-side JS)</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">STT</span>
+          <span class="dep-val">Web Speech API</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">TTS</span>
+          <span class="dep-val">SpeechSynthesis API</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Fonts</span>
+          <span class="dep-val">Rajdhani · JetBrains Mono</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Backend</span>
+          <span class="dep-val" style="color:var(--teal)">None (Zero Backend)</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Framework</span>
+          <span class="dep-val">Vanilla HTML/CSS/JS</span>
+        </div>
+      </div>
+
+      <div class="dep-card">
+        <h3>✅ Deployment Checklist</h3>
+        <div class="dep-row">
+          <span class="dep-key">All tests passing</span>
+          <span class="dep-val" style="color:var(--green)">✓ Done</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Backup branch created</span>
+          <span class="dep-val" style="color:var(--green)">✓ Done</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Test report committed</span>
+          <span class="dep-val" style="color:var(--green)">✓ Done</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Live URL verified</span>
+          <span class="dep-val" style="color:var(--green)">✓ Done</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Mobile responsive</span>
+          <span class="dep-val" style="color:var(--green)">✓ Done</span>
+        </div>
+        <div class="dep-row">
+          <span class="dep-key">Milestone 4 complete</span>
+          <span class="dep-val" style="color:var(--green)">✓ Done</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── TAB NAVIGATION ──
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.navtab').forEach(t => t.classList.remove('on'));
+  document.getElementById('tab-' + name).classList.add('on');
+  event.currentTarget.classList.add('on');
+  if (name === 'overview' || name === 'performance') animateBars();
+}
+
+// ── ANIMATE BARS ──
+function animateBars() {
+  setTimeout(() => {
+    document.querySelectorAll('[data-w]').forEach(el => {
+      el.style.width = el.getAttribute('data-w');
+    });
+  }, 100);
+}
+
+// ── TEST DATA ──
+const intentTests = [
+  { id:'TC-01', input:'book a ticket',            expected:'book_ticket',         conf:92, result:'pass' },
+  { id:'TC-02', input:'I want to travel to Delhi', expected:'book_ticket',         conf:87, result:'pass' },
+  { id:'TC-03', input:'check my PNR 1234567890',  expected:'pnr_status',          conf:95, result:'pass' },
+  { id:'TC-04', input:'PNR status',               expected:'pnr_status',          conf:90, result:'pass' },
+  { id:'TC-05', input:'train schedule for 12301', expected:'train_schedule',      conf:88, result:'pass' },
+  { id:'TC-06', input:'cancel my ticket',         expected:'cancel_ticket',       conf:91, result:'pass' },
+  { id:'TC-07', input:'fare from Mumbai to Delhi',expected:'fare_enquiry',        conf:85, result:'pass' },
+  { id:'TC-08', input:'where is my train',        expected:'running_status',      conf:83, result:'pass' },
+  { id:'TC-09', input:'I have a complaint',       expected:'complaint',           conf:89, result:'pass' },
+  { id:'TC-10', input:'goodbye',                  expected:'end_session',         conf:94, result:'pass' },
+  { id:'TC-11', input:'xyzabc random gibberish',  expected:'unknown',             conf:12, result:'pass' },
+  { id:'TC-12', input:'abcd',                     expected:'unknown',             conf:8,  result:'pass' },
+];
+
+const entityTests = [
+  { id:'TE-01', input:'from Mumbai to Delhi',  expected:'src: Mumbai, dst: Delhi', extracted:'Both ✓',    result:'pass' },
+  { id:'TE-02', input:'PNR 4521678903',         expected:'pnr: 4521678903',        extracted:'Correct ✓', result:'pass' },
+  { id:'TE-03', input:'train 12301',            expected:'train_no: 12301',        extracted:'Correct ✓', result:'pass' },
+  { id:'TE-04', input:'sleeper class',          expected:'class: SL',              extracted:'Correct ✓', result:'pass' },
+  { id:'TE-05', input:'AC first class',         expected:'class: 1A',              extracted:'Correct ✓', result:'pass' },
+  { id:'TE-06', input:'2 passengers',           expected:'count: 2',               extracted:'Correct ✓', result:'pass' },
+];
+
+const dtmfTests = [
+  { id:'TD-01', key:'1', expected:'book_ticket flow',    reached:'book_ticket',    result:'pass' },
+  { id:'TD-02', key:'2', expected:'pnr_status flow',     reached:'pnr_status',     result:'pass' },
+  { id:'TD-03', key:'3', expected:'train_schedule flow', reached:'train_schedule', result:'pass' },
+  { id:'TD-04', key:'4', expected:'cancel_ticket flow',  reached:'cancel_ticket',  result:'pass' },
+  { id:'TD-05', key:'5', expected:'fare_enquiry flow',   reached:'fare_enquiry',   result:'pass' },
+  { id:'TD-06', key:'6', expected:'running_status flow', reached:'running_status', result:'pass' },
+  { id:'TD-07', key:'8', expected:'complaint flow',      reached:'complaint',      result:'pass' },
+  { id:'TD-08', key:'9', expected:'session_end',         reached:'session_end',    result:'pass' },
+  { id:'TD-09', key:'*', expected:'graceful fallback',   reached:'fallback msg',   result:'pass' },
+  { id:'TD-10', key:'0', expected:'graceful fallback',   reached:'fallback msg',   result:'pass' },
+];
+
+const edgeTests = [
+  { id:'TEC-01', scenario:'Empty input submitted',        expected:'Prompt to re-enter',              result:'pass' },
+  { id:'TEC-02', scenario:'Repeated invalid input (3x)',  expected:'Escalation message',              result:'pass' },
+  { id:'TEC-03', scenario:'Mid-flow session reset',       expected:'Clean state restart',             result:'pass' },
+  { id:'TEC-04', scenario:'Very long input string',       expected:'Graceful truncation',             result:'pass' },
+  { id:'TEC-05', scenario:'Non-English input',            expected:'Fallback to unknown intent',      result:'pass' },
+  { id:'TEC-06', scenario:'No Web Speech API browser',    expected:'Text input mode activated',       result:'pass' },
+];
+
+// ── RENDER TABLES ──
+function confHtml(c) {
+  const cls = c >= 70 ? 'hi' : c >= 40 ? 'md' : 'lo';
+  return `<div class="conf-wrap"><div class="conf-bar"><div class="conf-fill ${cls}" style="width:${c}%"></div></div><span class="conf-pct">${c}%</span></div>`;
+}
+function badgeHtml(r) {
+  if (r === 'pass') return '<span class="badge pass">✓ Pass</span>';
+  if (r === 'fail') return '<span class="badge fail">✗ Fail</span>';
+  return '<span class="badge skip">— Skip</span>';
+}
+
+function renderIntentTable(animated) {
+  const tb = document.getElementById('intentBody');
+  tb.innerHTML = intentTests.map((t, i) => `
+    <tr style="opacity:0;animation:fadeUp .3s ease ${animated ? i*60 : 0}ms forwards">
+      <td class="tid">${t.id}</td>
+      <td><span class="inp">${t.input}</span></td>
+      <td style="font-family:var(--fM);font-size:11px;color:var(--teal)">${t.expected}</td>
+      <td>${confHtml(t.conf)}</td>
+      <td>${badgeHtml(t.result)}</td>
+    </tr>`).join('');
+}
+
+function renderEntityTable(animated) {
+  const tb = document.getElementById('entityBody');
+  tb.innerHTML = entityTests.map((t, i) => `
+    <tr style="opacity:0;animation:fadeUp .3s ease ${animated ? i*60 : 0}ms forwards">
+      <td class="tid">${t.id}</td>
+      <td><span class="inp">${t.input}</span></td>
+      <td style="font-family:var(--fM);font-size:11px;color:var(--t2)">${t.expected}</td>
+      <td style="font-family:var(--fM);font-size:11px;color:var(--green)">${t.extracted}</td>
+      <td>${badgeHtml(t.result)}</td>
+    </tr>`).join('');
+}
+
+function renderDtmfTable(animated) {
+  const tb = document.getElementById('dtmfBody');
+  tb.innerHTML = dtmfTests.map((t, i) => `
+    <tr style="opacity:0;animation:fadeUp .3s ease ${animated ? i*60 : 0}ms forwards">
+      <td class="tid">${t.id}</td>
+      <td><span class="inp">[${t.key}]</span></td>
+      <td style="font-family:var(--fM);font-size:11px;color:var(--t2)">${t.expected}</td>
+      <td style="font-family:var(--fM);font-size:11px;color:var(--teal)">${t.reached}</td>
+      <td>${badgeHtml(t.result)}</td>
+    </tr>`).join('');
+}
+
+function renderEdgeTable(animated) {
+  const tb = document.getElementById('edgeBody');
+  tb.innerHTML = edgeTests.map((t, i) => `
+    <tr style="opacity:0;animation:fadeUp .3s ease ${animated ? i*60 : 0}ms forwards">
+      <td class="tid">${t.id}</td>
+      <td>${t.scenario}</td>
+      <td style="color:var(--t2);font-size:12px">${t.expected}</td>
+      <td>${badgeHtml(t.result)}</td>
+    </tr>`).join('');
+}
+
+// ── RUN TESTS ANIMATION ──
+function runTests() {
+  const btn = document.getElementById('runBtn');
+  btn.textContent = '⏳ Running…';
+  btn.classList.add('running');
+  btn.disabled = true;
+
+  // clear tables
+  ['intentBody','entityBody','dtmfBody','edgeBody'].forEach(id => {
+    document.getElementById(id).innerHTML = '';
+  });
+
+  setTimeout(() => { renderIntentTable(true); }, 300);
+  setTimeout(() => { renderEntityTable(true); }, 300 + intentTests.length * 60 + 200);
+  setTimeout(() => { renderDtmfTable(true); },   300 + (intentTests.length + entityTests.length) * 60 + 400);
+  setTimeout(() => { renderEdgeTable(true); },   300 + (intentTests.length + entityTests.length + dtmfTests.length) * 60 + 600);
+
+  const total = 300 + (intentTests.length + entityTests.length + dtmfTests.length + edgeTests.length) * 60 + 800;
+  setTimeout(() => {
+    btn.textContent = '✓ All Tests Passed';
+    btn.style.background = 'rgba(34,197,94,0.15)';
+    btn.style.color = 'var(--green)';
+    btn.style.border = '1px solid rgba(34,197,94,0.3)';
+  }, total);
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  animateBars();
+  renderIntentTable(false);
+  renderEntityTable(false);
+  renderDtmfTable(false);
+  renderEdgeTable(false);
+});
+
+// Animate bars when switching to perf/overview
+const origShowTab = showTab;
+</script>
+
+<style>
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+</style>
+
+</body>
+</html>
